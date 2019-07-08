@@ -1,81 +1,49 @@
 package com.sap.pizza.config;
 
-import com.sap.pizza.services.AuthenticationSuccessHandler;
-import com.sap.pizza.services.RestAuthenticationEntryPoint;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.annotation.Bean;
+import com.sap.pizza.security.JWTAuthenticationFilter;
+import com.sap.pizza.security.JWTAuthorizationFilter;
+import com.sap.pizza.services.UserDetailsServiceImpl;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.BeanIds;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler;
+
+import static com.sap.pizza.security.SecurityConstants.AUTH_LOGIN_URL;
+import static com.sap.pizza.security.SecurityConstants.AUTH_REGISTER_URL;
 
 @Configuration
 @EnableWebSecurity
+@EnableGlobalMethodSecurity(securedEnabled = true)
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final UserDetailsService userDetailsService;
+    private UserDetailsServiceImpl userDetailsService;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    private final RestAuthenticationEntryPoint restAuthenticationEntryPoint;
-
-    private final AuthenticationSuccessHandler mySuccessHandler;
-
-    private SimpleUrlAuthenticationFailureHandler myFailureHandler = new SimpleUrlAuthenticationFailureHandler();
-
-    @Autowired
-    public SecurityConfig(@Qualifier("userDetailsServiceImpl") UserDetailsService userDetailsService, RestAuthenticationEntryPoint restAuthenticationEntryPoint, AuthenticationSuccessHandler mySuccessHandler) {
+    public SecurityConfig(UserDetailsServiceImpl userDetailsService, BCryptPasswordEncoder bCryptPasswordEncoder) {
         this.userDetailsService = userDetailsService;
-        this.restAuthenticationEntryPoint = restAuthenticationEntryPoint;
-        this.mySuccessHandler = mySuccessHandler;
-    }
-    @Bean
-    public BCryptPasswordEncoder bCryptPasswordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-
-    @Bean(name = BeanIds.AUTHENTICATION_MANAGER)
-    @Override
-    public AuthenticationManager authenticationManagerBean() throws Exception {
-        return super.authenticationManagerBean();
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
-                .csrf().disable()
-                .exceptionHandling()
+        http.cors().and().csrf().disable().authorizeRequests()
+                .antMatchers(HttpMethod.POST, AUTH_REGISTER_URL).permitAll()
+                .anyRequest().authenticated()
                 .and()
-                .httpBasic()
-                .authenticationEntryPoint(restAuthenticationEntryPoint)
-                .and()
-                .authorizeRequests()
-                .antMatchers(HttpMethod.GET,"/products/").permitAll()
-                .antMatchers(HttpMethod.POST,"/products/").hasAnyRole("ADMIN")
-                .and()
-                .formLogin()
-                .successHandler(mySuccessHandler)
-                .failureHandler(myFailureHandler)
-                .and()
-                .logout();
+                .addFilter(new JWTAuthenticationFilter(authenticationManager()))
+                .addFilter(new JWTAuthorizationFilter(authenticationManager()))
+                // this disables session creation on Spring Security
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
     }
 
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        String admin = bCryptPasswordEncoder().encode("admin");
-        auth
-                .inMemoryAuthentication()
-                .passwordEncoder(bCryptPasswordEncoder())
-                .withUser("admin")
-                .password(admin)
-                .authorities("ROLE_ADMIN");
-
-        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder());
+    @Override
+    public void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(bCryptPasswordEncoder);
     }
+
 }

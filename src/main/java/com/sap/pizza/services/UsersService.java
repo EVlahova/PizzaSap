@@ -1,6 +1,6 @@
 package com.sap.pizza.services;
 
-import com.sap.pizza.entities.User;
+import com.sap.pizza.entities.ApplicationUser;
 import com.sap.pizza.exceptions.UserNotFoundException;
 import com.sap.pizza.interfaces.IDAOService;
 import com.sap.pizza.repositories.UsersRepository;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class UsersService implements IDAOService<User> {
+public class UsersService implements IDAOService<ApplicationUser> {
 
     private final UsersRepository repo;
 
@@ -20,31 +20,31 @@ public class UsersService implements IDAOService<User> {
     }
 
     @Override
-    public List<User> list() {
+    public List<ApplicationUser> list() {
         return repo.findAll();
     }
 
     @Override
-    public User get(int id) throws UserNotFoundException {
-        return repo.findById(id).orElseThrow(() -> new UserNotFoundException(String.format("User with id: %d not found!!", id)));
+    public ApplicationUser get(int id) throws UserNotFoundException {
+        return repo.findById(id).orElseThrow(() -> new UserNotFoundException(String.format("ApplicationUser with id: %d not found!!", id)));
     }
 
-    public User findByUsernameAndPassword( String username, String password) throws UserNotFoundException {
-        return repo.findByUsernameAndPassword(username, password).orElseThrow(() -> new UserNotFoundException(String.format("User with username: %s not found!!", username)));
+    public ApplicationUser findByUsernameAndPassword(String username, String password) throws UserNotFoundException {
+        return repo.findByUsernameAndPassword(username, password).orElseThrow(() -> new UserNotFoundException(String.format("ApplicationUser with username: %s not found!!", username)));
     }
 
-    public User findByUsername( String username ) {
+    public ApplicationUser findByUsername(String username ) {
         return repo.findByUsername(username).orElse( null);
     }
 
     @Override
-    public User save(User user) {
-        return repo.save(user);
+    public ApplicationUser save(ApplicationUser applicationUser) {
+        return repo.save(applicationUser);
     }
 
     @Override
-    public void delete(User user) {
-        repo.delete(user);
+    public void delete(ApplicationUser applicationUser) {
+        repo.delete(applicationUser);
     }
 
     @Override

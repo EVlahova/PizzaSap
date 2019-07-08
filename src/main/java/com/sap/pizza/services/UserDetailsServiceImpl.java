@@ -1,6 +1,6 @@
 package com.sap.pizza.services;
 
-import com.sap.pizza.entities.User;
+import com.sap.pizza.entities.ApplicationUser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -26,11 +26,10 @@ public class UserDetailsServiceImpl implements UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = service.findByUsername(username);
-        System.out.println(username);
+        ApplicationUser applicationUser = service.findByUsername(username);
         Set<GrantedAuthority> grantedAuthorities = new HashSet<>();
-        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_USER"));
+        grantedAuthorities.add(new SimpleGrantedAuthority("ROLE_EMPLOYEE"));
 
-        return new org.springframework.security.core.userdetails.User(user.getUsername(), user.getPassword(), grantedAuthorities);
+        return new org.springframework.security.core.userdetails.User(applicationUser.getUsername(), applicationUser.getPassword(), grantedAuthorities);
     }
 }

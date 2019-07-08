@@ -1,15 +1,15 @@
 package com.sap.pizza.repositories;
 
-import com.sap.pizza.entities.User;
+import com.sap.pizza.entities.ApplicationUser;
 import org.springframework.data.repository.CrudRepository;
 
 import java.util.List;
 import java.util.Optional;
 
-public interface UsersRepository extends CrudRepository<User, Integer> {
-    Optional<User> findByUsernameAndPassword(String username, String password);
-    Optional<User> findByUsername(String username);
+public interface UsersRepository extends CrudRepository<ApplicationUser, Integer> {
+    Optional<ApplicationUser> findByUsernameAndPassword(String username, String password);
+    Optional<ApplicationUser> findByUsername(String username);
 
-    List<User> findAll();
+    List<ApplicationUser> findAll();
 
 }
