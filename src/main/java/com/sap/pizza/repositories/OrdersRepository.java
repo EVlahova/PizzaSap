@@ -12,9 +12,9 @@ public interface OrdersRepository extends CrudRepository<Order, Integer> {
     List<Order> findAllByUser(ApplicationUser user);
 
     @Query(value = "SELECT SUM(times_ordered) FROM orders", nativeQuery = true)
-    long getNumberOfOrders();
+    Long getNumberOfOrders();
 
     @Query(value = "SELECT SUM(times_ordered * total) FROM orders", nativeQuery = true)
-    long getSumOfOrders();
+    Long getSumOfOrders();
 
 }

@@ -49,8 +49,8 @@ public class OrdersService implements IDAOService<Order> {
 
     @Override
     public long count() {
-        return repo.getNumberOfOrders();
+        return repo.getNumberOfOrders() != null ? repo.getNumberOfOrders() : 0;
     }
 
-    public long sum() { return repo.getSumOfOrders(); }
+    public long sum() { return repo.getSumOfOrders() != null ? repo.getSumOfOrders() : 0; }
 }
