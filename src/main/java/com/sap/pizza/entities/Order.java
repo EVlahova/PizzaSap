@@ -1,12 +1,15 @@
 package com.sap.pizza.entities;
 
-import com.sap.pizza.dto.OrderDto;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.sap.pizza.converters.OrderStatusConverter;
+import com.sap.pizza.enums.OrderStatus;
 
 import javax.persistence.*;
 import java.util.Set;
 
 @Entity
 @Table(name = "orders")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 public class Order {
 
     @Id
@@ -15,25 +18,40 @@ public class Order {
     private final int id;
 
     @Column(name = "total",nullable = false)
-    private final double total;
+    private double total;
 
-   @OneToMany(fetch = FetchType.LAZY)
-   @JoinColumn(name = "detail_id",nullable = false)
-   private final Set<OrderDetails> orderDetails;
+   @OneToMany(cascade = {CascadeType.ALL},fetch = FetchType.LAZY)
+   @JoinColumn(name = "order_id", nullable = false)
+   private Set<OrderDetails> orderDetails;
 
-   public Order(){
+    @ManyToOne(cascade = {CascadeType.MERGE}, fetch = FetchType.LAZY)
+    @JoinColumn(name="user_id", nullable=false)
+    private ApplicationUser user;
+
+    @Column(name = "order_status", length = 32, columnDefinition = "varchar(32) default 'CREATED'", nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    @Convert(converter = OrderStatusConverter.class)
+    private OrderStatus status;
+
+    @Column(name = "times_ordered", length = 11, columnDefinition = "int(11) default 1", nullable = false)
+    private int timesOrdered;
+
+    public Order(){
        //for JPA
-       this(0,0.0,null);
+       this(0,0,null,null, null, 0);
    }
 
-   public Order(OrderDto dto){
-       this(0, dto.getTotal(), dto.getOrderDetails());
-   }
+    public Order(double total, Set<OrderDetails> orderDetails, ApplicationUser user, OrderStatus status, int timesOrdered){
+        this(0, total, orderDetails, user, status, timesOrdered);
+    }
 
-   public Order(int id, double total, Set<OrderDetails> orderDetails){
+   public Order(int id, double total, Set<OrderDetails> orderDetails, ApplicationUser user, OrderStatus status, int timesOrdered){
        this.id = id;
        this.total = total;
        this.orderDetails = orderDetails;
+       this.user = user;
+       this.status = status;
+       this.timesOrdered = timesOrdered;
    }
 
     public int getId() {
@@ -46,5 +64,37 @@ public class Order {
 
     public Set<OrderDetails> getOrderDetails() {
         return orderDetails;
+    }
+
+    public void setOrderDetails(Set<OrderDetails> orderDetails) {
+        this.orderDetails = orderDetails;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public ApplicationUser getUser() {
+        return user;
+    }
+
+    public void setUser(ApplicationUser user) {
+        this.user = user;
+    }
+
+    public OrderStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(OrderStatus status) {
+        this.status = status;
+    }
+
+    public int getTimesOrdered() {
+        return timesOrdered;
+    }
+
+    public void setTimesOrdered(int timesOrdered) {
+        this.timesOrdered = timesOrdered;
     }
 }

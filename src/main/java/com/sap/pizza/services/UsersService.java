@@ -1,6 +1,7 @@
 package com.sap.pizza.services;
 
 import com.sap.pizza.entities.ApplicationUser;
+import com.sap.pizza.enums.UserRole;
 import com.sap.pizza.exceptions.UserNotFoundException;
 import com.sap.pizza.interfaces.IDAOService;
 import com.sap.pizza.repositories.UsersRepository;
@@ -33,8 +34,12 @@ public class UsersService implements IDAOService<ApplicationUser> {
         return repo.findByUsernameAndPassword(username, password).orElseThrow(() -> new UserNotFoundException(String.format("ApplicationUser with username: %s not found!!", username)));
     }
 
-    public ApplicationUser findByUsername(String username ) {
-        return repo.findByUsername(username).orElse( null);
+    public ApplicationUser findByUsername(String username ) throws UserNotFoundException {
+        return repo.findByUsername(username).orElseThrow( () -> new UserNotFoundException(String.format("ApplicationUser with username: %s not found!!", username)));
+    }
+
+    public List<ApplicationUser> getByRole(UserRole role) {
+        return repo.findAllByRole(role);
     }
 
     @Override

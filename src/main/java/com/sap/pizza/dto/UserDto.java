@@ -1,16 +1,18 @@
 package com.sap.pizza.dto;
 
+import com.sap.pizza.enums.UserRole;
+
 public class UserDto {
 
     private final String username;
     private final String password;
-    private final String role;
+    private final UserRole role;
 
     public UserDto() {
         this(null, null, null);
     }
 
-    public UserDto(String username, String password, String role){
+    public UserDto(String username, String password, UserRole role){
         this.username = username;
         this.password = password;
         this.role = role;
@@ -24,7 +26,7 @@ public class UserDto {
         return password;
     }
 
-    public String getRole(){
+    public UserRole getRole(){
         return role;
     }
 }

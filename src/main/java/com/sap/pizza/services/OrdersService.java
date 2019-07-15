@@ -1,5 +1,6 @@
 package com.sap.pizza.services;
 
+import com.sap.pizza.entities.ApplicationUser;
 import com.sap.pizza.entities.Order;
 import com.sap.pizza.exceptions.OrderNotFoundException;
 import com.sap.pizza.interfaces.IDAOService;
@@ -24,6 +25,8 @@ public class OrdersService implements IDAOService<Order> {
         return repo.findAll();
     }
 
+    public List<Order> userOrders(ApplicationUser user) { return repo.findAllByUser(user); }
+
     @Override
     public Order get(int id) throws OrderNotFoundException {
         return repo.findById(id).orElseThrow(() -> new OrderNotFoundException(String.format("Order with id: %d not found!!",id)));
@@ -46,6 +49,8 @@ public class OrdersService implements IDAOService<Order> {
 
     @Override
     public long count() {
-        return repo.count();
+        return repo.getNumberOfOrders();
     }
+
+    public long sum() { return repo.getSumOfOrders(); }
 }
